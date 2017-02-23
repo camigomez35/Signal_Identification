@@ -1,6 +1,6 @@
 function [matchedPoints1]=matching(image1,image2)
     I1 = rgb2gray(image1);
-    I2 = rgb2gray(image2)
+    I2 = rgb2gray(image2);
     points1 = detectSURFFeatures(I1);
     points2 = detectSURFFeatures(I2);
     

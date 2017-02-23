@@ -42,7 +42,7 @@ figure(1);imshow(imagen);impixelinfo
 %min1 = min(s,m);
 min1 = componente;
 %figure(3); imshow(min1);impixelinfo
-min1(min1<160)=0;
+min1(min1<150)=0;
 min1(min1>0)=255;
 min1 = [min1,min1,min1];
 min1 = reshape(min1,[fil,col,cap]);
@@ -94,11 +94,20 @@ imagenDos = imagen;
 imagenDos(sinRuido==0)=0;
 figure(2); imshow(imagenDos);
 
-recorte = recortar(imagenDos);
-figure(3);imshow(recorte);
-
-porcentaje = reconocedor(recorte);
-porcentaje
+[fil_o, col_o, cap]= size(imagenDos);
+if cap>1; imagen2=rgb2gray(imagenDos); end;
+[l,n] = bwlabel(imagen2);
+imagenes = [];
+resultados = [];
+for i = 1:n
+    figura=imagen2*0; 
+    figura(l==i)=255;
+    recorte = recortar(figura, imagenDos);
+    porcentaje = reconocedor(recorte);
+    porcentaje
+    resultados = [resultados, porcentaje.Count]
+end
+resultados
 
 % [l,n] = bwlabel(imagenDos);
 % figure(3);imshow(l);impixelinfo
