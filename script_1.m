@@ -103,13 +103,8 @@ for i = 1:n
     figura=imagen2*0; 
     figura(l==i)=255;
     recorte = recortar(figura, imagenDos);
-    porcentaje = reconocedor(recorte);
-    porcentaje
-    resultados = [resultados, porcentaje.Count]
+    porcentaje = reconocedor(recorte, i);
+    resultados = [resultados; porcentaje];
 end
-resultados
 
-% [l,n] = bwlabel(imagenDos);
-% figure(3);imshow(l);impixelinfo
-%reconocedor(l, n);
 

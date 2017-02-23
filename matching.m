@@ -11,6 +11,6 @@ function [matchedPoints1]=matching(image1,image2)
     matchedPoints1 = vpts1(indexPairs(:,1));
     matchedPoints2 = vpts2(indexPairs(:,2));
     
-    figure; showMatchedFeatures(I1,I2,matchedPoints1,matchedPoints2);
-    legend('matched points 1','matched points 2');
+    %figure; showMatchedFeatures(I1,I2,matchedPoints1,matchedPoints2);
+    %legend('matched points 1','matched points 2');
 end
