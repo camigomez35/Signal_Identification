@@ -1,4 +1,4 @@
-function porcent = reconocedor(imagen, indice)    
+function respuesta = reconocedor(imagen, indice)    
      fnames = dir('señales/*.jpg');
      numfids = length(fnames);
      porcent = [];
@@ -10,9 +10,10 @@ function porcent = reconocedor(imagen, indice)
         porcent = [porcent, var];
      end
      maximo=max(porcent);
-     ind = find(porcent==maximo)
-     figure(indice); imshow(imagen); 
-     title(['Señal = ', fnames(ind).name]);
+     ind = find(porcent==maximo);
+     respuesta = fnames(ind).name;
+     respuesta = respuesta(1);
+     
  end
 
 
