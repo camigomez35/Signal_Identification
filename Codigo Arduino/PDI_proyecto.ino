@@ -17,7 +17,7 @@
 //Variables necesarias
 int val=10;
 int velocidadAdelante = 100;
-int velocidadAdelante2 = 110;
+int velocidadAdelante2 = 120;
 int velocidadGiro = 50;
 //Motor Derecho
 int pin6=6;
