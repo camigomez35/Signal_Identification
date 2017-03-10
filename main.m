@@ -19,14 +19,15 @@
 clear all
 close all
 clc
-%Leemos desde la cámara IP
-url = 'http://192.168.1.55:8080/photo.jpg';
-%Conectamos el arduino
-% ard = arduino('COM3', 'Uno');
-% out1 ='D13';
-% out2 ='D12';
-% out3 ='D8';
-% out4 ='D7';
+
+%Lectura de la cámara IP o del PC
+%cam = videoinput('winvideo',2 ,'MJPG_1280x720');
+cam = videoinput('winvideo',1 ,'RGB24_640x480');
+preview(cam);
+
+%Iniciacilizamos conexión modulo Bluetooth
+modulo_b = Bluetooth('HC-05',1);
+fopen(modulo_b);
 
 %--------------------------------------------------------------------------
 %-- 2. Lectura de la imagen  ----------------------------------------------
@@ -37,29 +38,28 @@ url = 'http://192.168.1.55:8080/photo.jpg';
 %camara =videoinput('winvideo',1,'MJPG_1280x720');
 %imagen = getsnapshot(camara); %b=imresize(b, 0.5);
 %Para leer imagenes que ya estan en la base de datos
-imagen = imread('imagen_2.jpg');
+%imagen = imread('imagen_2.jpg');
+%--------------------------------------------------------------------------
+
+%--------------------------------------------------------------------------
+%-- 3. Procesamiento de imagenes-------------------------------------------
 %--------------------------------------------------------------------------
 
 while(1)
     tic
-%     writeDigitalPin(ard, out1, 1);%Adelante izquierda
-%     writeDigitalPin(ard, out2, 0);%Atras izquierda
-%     writeDigitalPin(ard, out3, 1);%Adelante derecha
-%     writeDigitalPin(ard, out4, 0);%Atras derecha
-    %Captuta de la imagen
-	%imagen  = imread(url);
+    %Captuta de la imagen cada que se reinicia el While
+	imagen = getsnapshot(cam);
     [fil,col,cap]=size(imagen);
     
 %--------------------------------------------------------------------------
-%-- 3. Sepera la imagen en sus tres componentes CMY  ----------------------
+%-- 3.1. Sepera la imagen en sus tres componentes CMY  --------------------
 %--------------------------------------------------------------------------
     %Se trae la componente M de CMY
     [componente] = componentes(imagen);
 
 %--------------------------------------------------------------------------
-%-- 4. Sepera la imagen en sus cuatro componentes SCMY  -------------------
+%-- 3.2. Sepera la imagen en sus cuatro componentes SCMY  -----------------
 %--------------------------------------------------------------------------
-
     %Para señales rojas
     min1 = componente;
     min1(min1<150)=0;
@@ -70,7 +70,7 @@ while(1)
     copiaImagen(min1==0)=0;
     
 %--------------------------------------------------------------------------
-%-- 5. Segmentar la imagen y eliminar ruido -------------------------------
+%-- 3.3. Segmentar la imagen y eliminar ruido -----------------------------
 %--------------------------------------------------------------------------
     if cap>1
         copiaImagen=rgb2gray(copiaImagen); 
@@ -118,33 +118,46 @@ while(1)
         respuesta = [respuesta; porcentaje];
         cont = cont+1;
     end
-
-     queHacer = 'Que hago?'
-     respuesta = str2num(respuesta)
-     if(respuesta == 1)
-        pare = 'pare'
-%         writeDigitalPin(ard, out1, 0);%Adelante izquierda
-%         writeDigitalPin(ard, out2, 0);%Atras izquierda
-%         writeDigitalPin(ard, out3, 0);%Adelante derecha
-%         writeDigitalPin(ard, out4, 0);%Atras derecha
-%         pause(2);
-     %El carro gira a la izquierda
-     elseif (respuesta==3)
-        izqu = 'izquierda'
-%         writeDigitalPin(ard, out1, 0);%Adelante izquierda
-%         writeDigitalPin(ard, out2, 0);%Atras izquierda
-%         writeDigitalPin(ard, out3, 1);%Adelante derecha
-%         writeDigitalPin(ard, out4, 0);%Atras derecha
-%         pause(2);
-     %El carro gira a la derecha
-     elseif (respuesta==2)
-        derecha = 'derecha'
-%         writeDigitalPin(ard, out1, 1);%Adelante izquierda
-%         writeDigitalPin(ard, out2, 0);%Atras izquierda
-%         writeDigitalPin(ard, out3, 0);%Adelante derecha
-%         writeDigitalPin(ard, out4, 0);%Atras derecha
-%         pause(2);
-    end
-       
+%--------------------------------------------------------------------------
+%-- 4. Enviar información via Bluetooth al arduino-------------------------
+%--------------------------------------------------------------------------
+     mensaje = '';
+     if cont >1
+        for i = 1:cont
+            resp = respuesta(i);
+            resp = str2num(resp);
+            if(resp == 1)
+                mensaje = 'Pare';
+                fwrite(modulo_b, 30);
+             %El carro gira a la izquierda
+             elseif (resp==3)
+                mensaje = 'Derecha';
+                fwrite(modulo_b, 10);
+             elseif (resp==2)
+                mensaje = 'Izquierda';
+                fwrite(modulo_b, 20);
+             elseif (resp==0)
+                 mensaje = 'Adelante';
+                 fwrite(modulo_b, 40);
+            end
+        end
+     elseif cont == 1         
+         respuesta = str2num(respuesta);
+         if(respuesta == 1)
+            mensaje = 'Pare';
+            fwrite(modulo_b, 30);
+         %El carro gira a la izquierda
+         elseif (respuesta==3)
+            mensaje = 'Izquierda';
+            fwrite(modulo_b, 20);
+         elseif (respuesta==2)
+             mensaje = 'Derecha';
+             fwrite(modulo_b, 10);
+         elseif (respuesta==0)
+             mensaje = 'Adelante';
+             fwrite(modulo_b, 40);
+         end
+     end
+     disp(mensaje);
     toc
 end
