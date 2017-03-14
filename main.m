@@ -58,13 +58,16 @@ while(1)
 %--------------------------------------------------------------------------
 %-- 3.1. Separa la imagen en sus tres componentes CMY  --------------------
 %--------------------------------------------------------------------------
-    %Se trae la componente M de CMY
+    %Se trae la componente a de LAB
+    % LAB se refieren al espacio de color tridimensional, 
+    %en donde L o L* es luminosidad de negro a blanco, 
+    %A o a* va de rojo a verde 
+    %y B o b* es la gradiente del azul. 
     [componente] = componentes(imagen);
 
 %--------------------------------------------------------------------------
-%-- 3.2. Sepera la imagen en sus cuatro componentes SCMY  -----------------
+%-- 3.2. Generar un umbral para la información de la imagen a procesar ----
 %--------------------------------------------------------------------------
-    %Para señales rojas
     min1 = componente;
     min1(min1<150)=0;
     min1(min1>0)=255;
@@ -121,7 +124,7 @@ while(1)
         respuesta = [respuesta; porcentaje];
         cont = cont+1;
     end
-%-----------------------------<---------------------------------------------
+%--------------------------------------------------------------------------
 %-- 4. Enviar información via Bluetooth al arduino-------------------------
 %--------------------------------------------------------------------------
      mensaje = '';
