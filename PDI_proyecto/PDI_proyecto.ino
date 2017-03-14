@@ -76,12 +76,6 @@ void loop()
     }else if(val==30){
       digitalWrite(pin13,LOW);
       digitalWrite(pin7,LOW);
-      delay(3000);
-      analogWrite(pin11, velocidadAdelante);
-      analogWrite(pin6, velocidadAdelante2);
-      digitalWrite(pin13,HIGH);
-      digitalWrite(pin7, HIGH);
-      delay(4000);
     }else if(val==40){
       analogWrite(pin11, velocidadAdelante);
       analogWrite(pin6, velocidadAdelante2);
