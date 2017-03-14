@@ -19,15 +19,19 @@
 clear all
 close all
 clc
+disp('Reconocedor de señales de transito');
 
 %Lectura de la cámara IP o del PC
 %cam = videoinput('winvideo',2 ,'MJPG_1280x720');
 cam = videoinput('winvideo',1 ,'RGB24_640x480');
+disp('Enlace con camara ip establecido');
 preview(cam);
 
 %Iniciacilizamos conexión modulo Bluetooth
 modulo_b = Bluetooth('HC-05',1);
 fopen(modulo_b);
+disp('Enlace con modulo Bluetooth establecido');
+fwrite(modulo_b, 40);
 
 %--------------------------------------------------------------------------
 %-- 2. Lectura de la imagen  ----------------------------------------------
@@ -47,12 +51,12 @@ fopen(modulo_b);
 
 while(1)
     tic
-    %Captuta de la imagen cada que se reinicia el While
+    %Captura de la imagen cada que se reinicia el While
 	imagen = getsnapshot(cam);
     [fil,col,cap]=size(imagen);
     
 %--------------------------------------------------------------------------
-%-- 3.1. Sepera la imagen en sus tres componentes CMY  --------------------
+%-- 3.1. Separa la imagen en sus tres componentes CMY  --------------------
 %--------------------------------------------------------------------------
     %Se trae la componente M de CMY
     [componente] = componentes(imagen);
@@ -105,7 +109,6 @@ while(1)
 
     [fil_o, col_o, cap]= size(imagenDos);
     if cap>1; imagen2=rgb2gray(imagenDos); end;
-    
     [l,n] = bwlabel(imagen2);
     imagenes = [];
     respuesta = [];
@@ -118,7 +121,7 @@ while(1)
         respuesta = [respuesta; porcentaje];
         cont = cont+1;
     end
-%--------------------------------------------------------------------------
+%-----------------------------<---------------------------------------------
 %-- 4. Enviar información via Bluetooth al arduino-------------------------
 %--------------------------------------------------------------------------
      mensaje = '';
@@ -126,38 +129,39 @@ while(1)
         for i = 1:cont
             resp = respuesta(i);
             resp = str2num(resp);
-            if(resp == 1)
-                mensaje = 'Pare';
-                fwrite(modulo_b, 30);
-             %El carro gira a la izquierda
-             elseif (resp==3)
-                mensaje = 'Derecha';
-                fwrite(modulo_b, 10);
-             elseif (resp==2)
-                mensaje = 'Izquierda';
-                fwrite(modulo_b, 20);
-             elseif (resp==0)
-                 mensaje = 'Adelante';
-                 fwrite(modulo_b, 40);
+            switch resp
+                case 1
+                    mensaje = 'Pare';
+                    fwrite(modulo_b, 30);
+                case 3
+                    mensaje = 'Derecha';
+                    fwrite(modulo_b, 10);
+                case 2
+                    mensaje = 'Izquierda';
+                    fwrite(modulo_b, 20);
+                otherwise
+                    mensaje = 'Adelante';
+                    fwrite(modulo_b, 40);
             end
+            disp(mensaje);
         end
      elseif cont == 1         
          respuesta = str2num(respuesta);
-         if(respuesta == 1)
-            mensaje = 'Pare';
-            fwrite(modulo_b, 30);
-         %El carro gira a la izquierda
-         elseif (respuesta==3)
-            mensaje = 'Izquierda';
-            fwrite(modulo_b, 20);
-         elseif (respuesta==2)
-             mensaje = 'Derecha';
-             fwrite(modulo_b, 10);
-         elseif (respuesta==0)
-             mensaje = 'Adelante';
-             fwrite(modulo_b, 40);
+         switch respuesta
+             case 1
+                mensaje = 'Pare';
+                fwrite(modulo_b, 30);
+             case 3
+                mensaje = 'Izquierda';
+                fwrite(modulo_b, 20);
+             case 2
+                mensaje = 'Derecha';
+                fwrite(modulo_b, 10);
+             otherwise
+                mensaje = 'Adelante';
+                fwrite(modulo_b, 40);
          end
      end
      disp(mensaje);
-    toc
+     toc
 end
